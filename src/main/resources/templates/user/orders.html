@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Orders</title>
+</head>
+<body>
+    <h1>My Orders</h1>
+    
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Order #</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="order : ${orders}">
+                <td th:text="${order.orderNumber}"></td>
+                <td th:text="${#temporals.format(order.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></td>
+                <td th:text="${order.status}"></td>
+                <td>
+                    <a th:href="@{/user/orders/{orderId}(orderId=${order.id})}" 
+                       class="btn btn-info">View</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+	<a href="/user/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+	<a href="/user/dashboard">Back to dashboard</a></p>
+</body>
+</html>
