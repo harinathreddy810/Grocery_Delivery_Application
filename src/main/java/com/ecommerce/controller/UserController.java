@@ -43,7 +43,7 @@ public class UserController {
 
         if (category != null && !category.isEmpty()) {
             Category cat = categoryRepository.findByName(category).orElse(null);
-            products = cat != null ? productService.findByCategory(cat) : productService.findActiveProducts();
+            products = (cat != null) ? productService.findByCategory(cat) : productService.findActiveProducts();
         } else {
             products = productService.findActiveProducts();
         }
@@ -123,9 +123,15 @@ public class UserController {
 
         try {
             Order order = orderService.createOrder(user, paymentMethod, address);
+
+            if ("ONLINE".equalsIgnoreCase(paymentMethod)) {
+                return "redirect:/user/payment/" + order.getId();
+            }
+
             redirectAttributes.addFlashAttribute("success",
                     "Order #" + order.getOrderNumber() + " placed successfully!");
             return "redirect:/user/orders";
+
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/user/cart";
@@ -155,5 +161,50 @@ public class UserController {
 
         model.addAttribute("order", order);
         return "user/order-details";
+    }
+
+    @GetMapping("/payment/{orderId}")
+    public String paymentPage(@PathVariable Long orderId,
+                              @AuthenticationPrincipal UserDetails userDetails,
+                              Model model) {
+
+        User user = userService.findByUsername(userDetails.getUsername()).orElse(null);
+        Order order = orderService.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid order ID"));
+
+        if (!order.getUser().getId().equals(user.getId())) {
+            return "redirect:/user/orders";
+        }
+
+        model.addAttribute("order", order);
+        return "user/payment";
+    }
+
+    @PostMapping("/payment/complete/{orderId}")
+    public String completePayment(@PathVariable Long orderId,
+                                  @RequestParam String paymentType,
+                                  @RequestParam(required = false) String cardNumber,
+                                  @RequestParam(required = false) String cardName,
+                                  @RequestParam(required = false) String expiryDate,
+                                  @RequestParam(required = false) String cvv,
+                                  @RequestParam(required = false) String upiId,
+                                  @AuthenticationPrincipal UserDetails userDetails,
+                                  RedirectAttributes redirectAttributes) {
+
+        User user = userService.findByUsername(userDetails.getUsername()).orElse(null);
+        Order order = orderService.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid order ID"));
+
+        if (!order.getUser().getId().equals(user.getId())) {
+            return "redirect:/user/orders";
+        }
+
+        // Store the selected payment method (you can enhance this to store actual payment details securely)
+        order.setPaymentMethod("ONLINE (" + paymentType + ")");
+        orderService.updateOrder(order);
+
+        redirectAttributes.addFlashAttribute("success",
+                "Order #" + order.getOrderNumber() + " placed successfully!");
+        return "redirect:/user/orders";
     }
 }

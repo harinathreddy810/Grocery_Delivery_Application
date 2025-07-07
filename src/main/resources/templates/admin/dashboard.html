@@ -89,6 +89,37 @@
             </div>
         </div>
     </div>
+	<!-- Add this to your admin dashboard template -->
+	<div class="reports-section">
+	    <h2>Reports</h2>
+	    <div class="report-links">
+	        <a th:href="@{/admin/reports/sales}" class="btn btn-primary">Sales Report</a>
+	        <a th:href="@{/admin/reports/products}" class="btn btn-primary">Product Report</a>
+	        <a th:href="@{/admin/reports/orders}" class="btn btn-primary">Order Report</a>
+	    </div>
+	    
+	    <!-- Quick Stats from Sales Report -->
+	    <div class="quick-stats">
+	        <h3>Recent Sales Summary (Last 30 Days)</h3>
+	        <div class="stat-cards">
+	            <div class="card">
+	                <h4>Total Sales</h4>
+	                <p th:text="${#numbers.formatDecimal(salesReport.totalSales, 1, 2)}"></p>
+	            </div>
+	            <div class="card">
+	                <h4>Total Orders</h4>
+	                <p th:text="${salesReport.totalOrders}"></p>
+	            </div>
+	            <div class="card">
+	                <h4>Top Product</h4>
+	                <p th:if="${not salesReport.topProducts.empty}" 
+	                   th:text="${salesReport.topProducts[0].product.name} + ' (' + ${salesReport.topProducts[0].soldCount} + ' sold)'">
+	                </p>
+	                <p th:if="${salesReport.topProducts.empty}">No sales data</p>
+	            </div>
+	        </div>
+	    </div>
+	</div>
 
     <script th:src="@{/js/main.js}"></script>
 </body>

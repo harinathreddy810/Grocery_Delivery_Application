@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Sales Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>My Sales Report</h1>
+    
+    <form method="get" th:action="@{/vendor/reports/sales}">
+        <label>From: <input type="date" name="start" th:value="${salesReport.startDate}"></label>
+        <label>To: <input type="date" name="end" th:value="${salesReport.endDate}"></label>
+        <button type="submit">Generate</button>
+    </form>
+    
+    <div class="summary">
+        <h2>Summary</h2>
+        <p>Total Sales: <span th:text="${#numbers.formatDecimal(salesReport.totalSales, 1, 2)}"></span></p>
+        <p>Total Orders: <span th:text="${salesReport.totalOrders}"></span></p>
+    </div>
+    
+    <div class="product-performance">
+        <h2>Product Performance</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Stock</th>
+                    <th>Units Sold</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${salesReport.productPerformance}">
+                    <td th:text="${item.product.name}"></td>
+                    <td th:text="${#numbers.formatDecimal(item.product.price, 1, 2)}"></td>
+                    <td th:text="${item.product.quantity}"></td>
+                    <td th:text="${item.soldCount}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

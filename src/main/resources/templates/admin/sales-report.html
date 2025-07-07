@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Sales Report</title>
+    <!-- Include Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Sales Report</h1>
+    
+    <form method="get" th:action="@{/admin/reports/sales}">
+        <label>From: <input type="date" name="start" th:value="${salesReport.startDate}"></label>
+        <label>To: <input type="date" name="end" th:value="${salesReport.endDate}"></label>
+        <button type="submit">Generate</button>
+    </form>
+    
+    <div class="summary">
+        <h2>Summary</h2>
+        <p>Total Sales: <span th:text="${#numbers.formatDecimal(salesReport.totalSales, 1, 2)}"></span></p>
+        <p>Total Orders: <span th:text="${salesReport.totalOrders}"></span></p>
+    </div>
+    
+    <div class="chart-container" style="width: 80%; margin: 20px auto;">
+        <canvas id="salesByStatusChart"></canvas>
+    </div>
+    
+    <div class="top-products">
+        <h2>Top Selling Products</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Units Sold</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${salesReport.topProducts}">
+                    <td th:text="${item.product.name}"></td>
+                    <td th:text="${item.soldCount}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <script>
+        const ctx = document.getElementById('salesByStatusChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [[${salesReport.salesByStatus.keySet()}]],
+                datasets: [{
+                    label: 'Sales by Status',
+                    data: [[${salesReport.salesByStatus.values()}]],
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

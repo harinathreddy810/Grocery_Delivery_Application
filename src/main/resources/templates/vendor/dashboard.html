@@ -80,6 +80,37 @@
             </div>
         </div>
     </div>
+	
+	<!-- Add this to your vendor dashboard template -->
+	<div class="reports-section">
+	    <h2>My Reports</h2>
+	    <div class="report-links">
+	        <a th:href="@{/vendor/reports/sales}" class="btn btn-primary">Sales Report</a>
+	        <a th:href="@{/vendor/reports/products}" class="btn btn-primary">Product Performance</a>
+	    </div>
+	    
+	    <!-- Quick Stats -->
+	    <div class="quick-stats">
+	        <h3>Recent Performance (Last 30 Days)</h3>
+	        <div class="stat-cards">
+	            <div class="card">
+	                <h4>Total Sales</h4>
+	                <p th:text="${#numbers.formatDecimal(salesReport.totalSales, 1, 2)}"></p>
+	            </div>
+	            <div class="card">
+	                <h4>Orders</h4>
+	                <p th:text="${salesReport.totalOrders}"></p>
+	            </div>
+	            <div class="card">
+	                <h4>Best Seller</h4>
+	                <p th:if="${not salesReport.productPerformance.empty}" 
+	                   th:text="${salesReport.productPerformance[0].product.name} + ' (' + ${salesReport.productPerformance[0].soldCount} + ' sold)'">
+	                </p>
+	                <p th:if="${salesReport.productPerformance.empty}">No sales data</p>
+	            </div>
+	        </div>
+	    </div>
+	</div>
 
     <script th:src="@{/js/main.js}"></script>
 </body>

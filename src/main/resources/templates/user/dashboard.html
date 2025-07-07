@@ -21,6 +21,19 @@
         <div class="shop-header">
             <h1>Shop Fresh Products</h1>
 			
+			<div class="search-container">
+			    <form th:action="@{/user/dashboard}" method="get" class="search-form">
+			        <input type="text" 
+			               name="search" 
+			               th:value="${searchQuery}" 
+			               placeholder="Search products..." 
+			               class="search-input">
+			        <button type="submit" class="search-btn">Search</button>
+			        <a th:if="${searchQuery != null && !searchQuery.isEmpty()}" 
+			           href="/user/dashboard" 
+			           class="clear-search">Clear</a>
+			    </form>
+			</div>
             
             <div class="category-filters">
                 <a href="/user/dashboard" 
