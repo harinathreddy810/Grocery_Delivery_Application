@@ -30,6 +30,9 @@ public class Order {
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
     
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now() ;
+    
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<OrderItem> orderItems;
     
@@ -108,6 +111,14 @@ public class Order {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    public LocalDateTime getupdatedAt() {
+        return updatedAt;
+    }
+    
+    public void setupdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public Set<OrderItem> getOrderItems() {

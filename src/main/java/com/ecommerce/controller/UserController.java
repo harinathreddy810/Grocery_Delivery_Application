@@ -38,13 +38,24 @@ public class UserController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(Model model, @RequestParam(required = false) String category) {
+    public String dashboard(Model model, 
+                           @RequestParam(required = false) String category,
+                           @RequestParam(required = false) String search) {
+        
         List<Product> products;
-
-        if (category != null && !category.isEmpty()) {
+        
+        if (search != null && !search.isEmpty()) {
+            // Search products by name or description
+            products = productService.searchProducts(search);
+            model.addAttribute("searchQuery", search);
+        } 
+        else if (category != null && !category.isEmpty()) {
+            // Filter by category
             Category cat = categoryRepository.findByName(category).orElse(null);
             products = (cat != null) ? productService.findByCategory(cat) : productService.findActiveProducts();
-        } else {
+        } 
+        else {
+            // Show all active products
             products = productService.findActiveProducts();
         }
 

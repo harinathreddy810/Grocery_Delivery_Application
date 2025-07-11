@@ -1,45 +1,180 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>My Sales Report</title>
-	<link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Sales Report</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .report-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .summary-card {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+        }
+        .product-table th {
+            background-color: #f8f9fa;
+        }
+        .date-filter {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        @media (max-width: 768px) {
+            .stat-value {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>My Sales Report</h1>
-    
-    <form method="get" th:action="@{/vendor/reports/sales}">
-        <label>From: <input type="date" name="start" th:value="${salesReport.startDate}"></label>
-        <label>To: <input type="date" name="end" th:value="${salesReport.endDate}"></label>
-        <button type="submit">Generate</button>
-    </form>
-    
-    <div class="summary">
-        <h2>Summary</h2>
-        <p>Total Sales: <span th:text="${#numbers.formatDecimal(salesReport.totalSales, 1, 2)}"></span></p>
-        <p>Total Orders: <span th:text="${salesReport.totalOrders}"></span></p>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Vendor Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vendor/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/vendor/reports/sales">Sales Report</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6 fw-bold">
+                    <i class="bi bi-graph-up me-2"></i>Sales Report
+                </h1>
+            </div>
+        </div>
+
+        <!-- Date Filter Form -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="date-filter">
+                    <form method="get" th:action="@{/vendor/reports/sales}" class="row g-3">
+                        <div class="col-md-5">
+                            <label for="startDate" class="form-label">From Date</label>
+                            <input type="date" class="form-control" id="startDate" name="start" th:value="${salesReport?.startDate}">
+                        </div>
+                        <div class="col-md-5">
+                            <label for="endDate" class="form-label">To Date</label>
+                            <input type="date" class="form-control" id="endDate" name="end" th:value="${salesReport?.endDate}">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-filter-circle me-2"></i>Generate
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Content -->
+        <div th:if="${salesReport != null}">
+            <!-- Summary Cards -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="report-card summary-card p-4 h-100">
+                        <h3 class="h5 mb-3">Total Sales</h3>
+                        <div class="stat-value text-primary">
+                            ₹<span th:text="${salesReport.totalSales != null} ? ${#numbers.formatDecimal(salesReport.totalSales, 1, 2)} : 0"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="report-card summary-card p-4 h-100">
+                        <h3 class="h5 mb-3">Total Orders</h3>
+                        <div class="stat-value text-primary">
+                            <span th:text="${salesReport.totalOrders != null} ? ${salesReport.totalOrders} : 0"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Performance -->
+            <div th:if="${salesReport.productPerformance != null and !salesReport.productPerformance.isEmpty()}">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="report-card p-4">
+                            <h2 class="h4 mb-4">
+                                <i class="bi bi-box-seam me-2"></i>Product Performance
+                            </h2>
+                            <div class="table-responsive">
+                                <table class="table product-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th class="text-end">Price</th>
+                                            <th class="text-end">Stock</th>
+                                            <th class="text-end">Units Sold</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="item : ${salesReport.productPerformance}">
+                                            <td th:text="${item.product?.name}"></td>
+                                            <td class="text-end">₹<span th:text="${item.product?.price != null} ? ${#numbers.formatDecimal(item.product.price, 1, 2)} : 0"></span></td>
+                                            <td class="text-end" th:text="${item.product?.quantity != null} ? ${item.product.quantity} : 0"></td>
+                                            <td class="text-end" th:text="${item.soldCount != null} ? ${item.soldCount} : 0"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:unless="${salesReport.productPerformance != null and !salesReport.productPerformance.isEmpty()}" class="row mt-4">
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i>No product performance data available.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div th:unless="${salesReport != null}" class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-info text-center py-5">
+                    <i class="bi bi-graph-up" style="font-size: 2.5rem;"></i>
+                    <h3 class="h4 mt-3">No sales report data available</h3>
+                    <p class="mb-0">Please select a date range and generate the report</p>
+                </div>
+            </div>
+        </div>
     </div>
-    
-    <div class="product-performance">
-        <h2>Product Performance</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Price</th>
-                    <th>Stock</th>
-                    <th>Units Sold</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item : ${salesReport.productPerformance}">
-                    <td th:text="${item.product.name}"></td>
-                    <td th:text="${#numbers.formatDecimal(item.product.price, 1, 2)}"></td>
-                    <td th:text="${item.product.quantity}"></td>
-                    <td th:text="${item.soldCount}"></td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

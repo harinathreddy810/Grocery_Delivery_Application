@@ -2,68 +2,246 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Sales Report</title>
-	<link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Include Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --accent: #4895ef;
+            --danger: #f72585;
+            --success: #4cc9f0;
+            --warning: #f8961e;
+            --info: #43aa8b;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --white: #ffffff;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+
+        .report-form {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .report-form label {
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .report-form input {
+            padding: 8px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        .report-form button {
+            padding: 8px 15px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .report-form button:hover {
+            background: var(--secondary);
+        }
+
+        .summary {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .summary h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .summary p {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .summary p strong {
+            color: var(--dark);
+        }
+
+        .chart-container {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .top-products {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .top-products h2 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .table th {
+            background: var(--primary);
+            color: var(--white);
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .report-form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .chart-container {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Sales Report</h1>
-    
-    <form method="get" th:action="@{/admin/reports/sales}">
-        <label>From: <input type="date" name="start" th:value="${salesReport.startDate}"></label>
-        <label>To: <input type="date" name="end" th:value="${salesReport.endDate}"></label>
-        <button type="submit">Generate</button>
-    </form>
-    
-    <div class="summary">
-        <h2>Summary</h2>
-        <p>Total Sales: <span th:text="${#numbers.formatDecimal(salesReport.totalSales, 1, 2)}"></span></p>
-        <p>Total Orders: <span th:text="${salesReport.totalOrders}"></span></p>
-    </div>
-    
-    <div class="chart-container" style="width: 80%; margin: 20px auto;">
-        <canvas id="salesByStatusChart"></canvas>
-    </div>
-    
-    <div class="top-products">
-        <h2>Top Selling Products</h2>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Units Sold</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="item : ${salesReport.topProducts}">
-                    <td th:text="${item.product.name}"></td>
-                    <td th:text="${item.soldCount}"></td>
-                </tr>
-            </tbody>
-        </table>
+    <div class="container">
+        <h1>Sales Report</h1>
+        
+        <a th:href="@{/admin/dashboard}" class="btn btn-secondary">
+                <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+            </a>
+        
+        <form method="get" th:action="@{/admin/reports/sales}" class="report-form">
+            <label>From: <input type="date" name="start" th:value="${salesReport.startDate}"></label>
+            <label>To: <input type="date" name="end" th:value="${salesReport.endDate}"></label>
+            <button type="submit">
+                <i class="fas fa-chart-bar"></i> Generate Report
+            </button>
+        </form>
+        
+        <div class="summary">
+            <h2>Summary</h2>
+            <p><strong>Total Sales:</strong> ₹<span th:text="${#numbers.formatDecimal(salesReport.totalSales, 1, 2)}"></span></p>
+            <p><strong>Total Orders:</strong> <span th:text="${salesReport.totalOrders}"></span></p>
+        </div>
+        
+        <div class="chart-container">
+            <canvas id="salesByStatusChart"></canvas>
+        </div>
+        
+        <div class="top-products">
+            <h2>Top Selling Products</h2>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Units Sold</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="item : ${salesReport.topProducts}">
+                        <td th:text="${item.product.name}"></td>
+                        <td th:text="${item.soldCount}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
     
     <script>
-        const ctx = document.getElementById('salesByStatusChart').getContext('2d');
-        const chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: [[${salesReport.salesByStatus.keySet()}]],
-                datasets: [{
-                    label: 'Sales by Status',
-                    data: [[${salesReport.salesByStatus.values()}]],
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('salesByStatusChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [[${salesReport.salesByStatus.keySet()}]],
+                    datasets: [{
+                        label: 'Sales by Status',
+                        data: [[${salesReport.salesByStatus.values()}]],
+                        backgroundColor: 'rgba(67, 97, 238, 0.5)',
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Sales Distribution by Order Status',
+                            font: {
+                                size: 16
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Total Sales ($)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Order Status'
+                            }
+                        }
                     }
                 }
-            }
+            });
         });
     </script>
 </body>

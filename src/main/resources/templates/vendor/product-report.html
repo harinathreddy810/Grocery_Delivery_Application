@@ -3,17 +3,19 @@
 <head>
     <title>Product Performance Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .card {
-            margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            border: none;
         }
         .stock-indicator {
             width: 100%;
-            height: 10px;
+            height: 8px;
             background: #f0f0f0;
-            border-radius: 5px;
+            border-radius: 4px;
             overflow: hidden;
         }
         .stock-progress {
@@ -24,165 +26,202 @@
         .stock-progress.danger { background: #dc3545; }
         .stat-card {
             transition: transform 0.3s;
+            border-left: 4px solid;
         }
         .stat-card:hover {
             transform: translateY(-5px);
         }
+        .stat-card.bg-primary { border-left-color: #0d6efd; }
+        .stat-card.bg-success { border-left-color: #198754; }
+        .stat-card.bg-warning { border-left-color: #ffc107; }
+        .stat-card.bg-danger { border-left-color: #dc3545; }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
     </style>
 </head>
-<body>
-<div class="container mt-4">
-    <h1>Product Performance</h1>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#">FreshMart Vendor</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vendor/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <div class="mb-4">
-        <a th:href="@{/vendor/dashboard}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Dashboard
-        </a>
-        <a th:href="@{/vendor/reports/sales}" class="btn btn-primary ms-2">
-            Sales Report
-        </a>
-    </div>
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2 mb-0">Product Performance</h1>
+            <div>
+                <a th:href="@{/vendor/dashboard}" class="btn btn-outline-secondary me-2">
+                    <i class="bi bi-arrow-left"></i> Dashboard
+                </a>
+                <a th:href="@{/vendor/reports/sales}" class="btn btn-primary">
+                    <i class="bi bi-graph-up"></i> Sales Report
+                </a>
+            </div>
+        </div>
 
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary stat-card">
-                <div class="card-body">
-                    <h5>Total Products</h5>
-                    <p class="display-6" th:text="${products.size()}"></p>
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-white bg-primary stat-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Products</h5>
+                        <p class="display-6" th:text="${products.size()}"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-success stat-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Active Products</h5>
+                        <p class="display-6" th:text="${#lists.size(products.?[active])}"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning stat-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Low Stock (<5)</h5>
+                        <p class="display-6" th:text="${#lists.size(products.?[quantity < 5 and quantity > 0])}"></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-danger stat-card">
+                    <div class="card-body">
+                        <h5 class="card-title">Out of Stock</h5>
+                        <p class="display-6" th:text="${#lists.size(products.?[quantity == 0])}"></p>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success stat-card">
-                <div class="card-body">
-                    <h5>Active Products</h5>
-                    <p class="display-6" th:text="${#lists.size(products.?[active])}"></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning stat-card">
-                <div class="card-body">
-                    <h5>Low Stock (<5)</h5>
-                    <p class="display-6" th:text="${#lists.size(products.?[quantity < 5 and quantity > 0])}"></p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-danger stat-card">
-                <div class="card-body">
-                    <h5>Out of Stock</h5>
-                    <p class="display-6" th:text="${#lists.size(products.?[quantity == 0])}"></p>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="card mb-4">
-        <div class="card-header"><h2>Stock Levels</h2></div>
-        <div class="card-body">
-            <canvas id="stockChart" height="100"></canvas>
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2 class="h4 mb-0">Stock Levels</h2>
+            </div>
+            <div class="card-body">
+                <div class="chart-container">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="mb-0">Inventory</h2>
-            <a th:href="@{/vendor/add-product}" class="btn btn-success">
-                <i class="fas fa-plus"></i> Add Product
-            </a>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Price</th>
-                            <th>Stock</th>
-                            <th>Status</th>
-                            <th>Sales (30d)</th>
-                            <th>Revenue</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="product : ${products}">
-                            <td>
-                                <strong th:text="${product.name}"></strong><br>
-                                <small class="text-muted" th:text="${product.category?.name} ?: 'No category'"></small>
-                            </td>
-                            <td th:text="${'$' + #numbers.formatDecimal(product.price, 1, 2)}"></td>
-                            <td>
-                                <div th:text="${product.quantity} + ' in stock'"></div>
-                                <div class="stock-indicator">
-                                    <div th:style="${'width:' + (product.quantity/maxStock*100) + '%'}"
-                                         th:class="${'stock-progress ' + (product.quantity == 0 ? 'danger' : (product.quantity < 5 ? 'warning' : ''))}">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2 class="h4 mb-0">Inventory</h2>
+                <a th:href="@{/vendor/add-product}" class="btn btn-success">
+                    <i class="bi bi-plus-lg"></i> Add Product
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                <th>Sales (30d)</th>
+                                <th>Revenue</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="product : ${products}">
+                                <td>
+                                    <strong th:text="${product.name}"></strong><br>
+                                    <small class="text-muted" th:text="${product.category?.name} ?: 'No category'"></small>
+                                </td>
+                                <td th:text="${'₹' + #numbers.formatDecimal(product.price, 1, 2)}"></td>
+                                <td>
+                                    <div th:text="${product.quantity} + ' in stock'"></div>
+                                    <div class="stock-indicator">
+                                        <div th:style="${'width:' + (product.quantity/maxStock*100) + '%'}"
+                                             th:class="${'stock-progress ' + (product.quantity == 0 ? 'danger' : (product.quantity < 5 ? 'warning' : ''))}">
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                            <td>
-                                <span th:if="${product.active}" class="badge bg-success">Active</span>
-                                <span th:if="${!product.active}" class="badge bg-secondary">Inactive</span>
-                            </td>
-                            <td th:text="${#maps.containsKey(salesData, product.id) ? salesData.get(product.id).soldQuantity : 0} + ' sold'"></td>
-                            <td th:text="${'$' + #numbers.formatDecimal(#maps.containsKey(salesData, product.id) ? salesData.get(product.id).totalRevenue : 0, 1, 2)}"></td>
-                            <td>
-                                <a th:href="@{/vendor/edit-product/{id}(id=${product.id})}" class="btn btn-sm btn-primary me-1">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a th:href="@{/vendor/delete-product/{id}(id=${product.id})}"
-                                   class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Are you sure you want to delete this product?')">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                                </td>
+                                <td>
+                                    <span th:if="${product.active}" class="badge bg-success">Active</span>
+                                    <span th:if="${!product.active}" class="badge bg-secondary">Inactive</span>
+                                </td>
+                                <td th:text="${#maps.containsKey(salesData, product.id) ? salesData.get(product.id).soldQuantity : 0} + ' sold'"></td>
+                                <td th:text="${'₹' + #numbers.formatDecimal(#maps.containsKey(salesData, product.id) ? salesData.get(product.id).totalRevenue : 0, 1, 2)}"></td>
+                                <td>
+                                    <a th:href="@{/vendor/edit-product/{id}(id=${product.id})}" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a th:href="@{/vendor/delete-product/{id}(id=${product.id})}"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Are you sure you want to delete this product?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<script>
-    const ctx = document.getElementById('stockChart').getContext('2d');
-    const stockChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: [[${products.![name]}]],
-            datasets: [{
-                label: 'Stock Quantity',
-                data: [[${products.![quantity]}]],
-                backgroundColor: (context) => {
-                    const value = context.raw;
-                    return value === 0 ? '#dc3545' : (value < 5 ? '#ffc107' : '#28a745');
-                },
-                borderColor: 'rgba(0,0,0,0.1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    title: {
-                        display: true,
-                        text: 'Quantity in Stock'
-                    }
-                },
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Products'
+    <script>
+        const ctx = document.getElementById('stockChart').getContext('2d');
+        const stockChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: [[${products.![name]}]],
+                datasets: [{
+                    label: 'Stock Quantity',
+                    data: [[${products.![quantity]}]],
+                    backgroundColor: (context) => {
+                        const value = context.raw;
+                        return value === 0 ? '#dc3545' : (value < 5 ? '#ffc107' : '#28a745');
+                    },
+                    borderColor: 'rgba(0,0,0,0.1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Quantity in Stock'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Products'
+                        }
                     }
                 }
             }
-        }
-    });
-</script>
+        });
+    </script>
 
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

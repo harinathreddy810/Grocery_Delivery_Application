@@ -4,66 +4,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - FreshMart</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+        
+        .auth-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .auth-card h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #28a745;
+        }
+        
+        .btn-full {
+            width: 100%;
+            padding: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .auth-link {
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+        
+        .form-control:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.25rem rgba(40, 167, 69, 0.25);
+        }
+        
+        .error-text {
+            color: #dc3545;
+            font-size: 0.875rem;
+        }
+        
+        .is-invalid {
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 <body>
     <div class="auth-container">
-        <div class="auth-card">
-            <h2>Register</h2>
-            
-            <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
-            
-            <form th:action="@{/register}" method="post" th:object="${user}" class="auth-form">
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" th:field="*{username}" required>
-                    <span th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error-text"></span>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="auth-card">
+                        <h2><i class="fas fa-user-plus me-2"></i>Register</h2>
+                        
+                        <div th:if="${error}" class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i><span th:text="${error}"></span>
+                        </div>
+                        
+                        <form th:action="@{/register}" method="post" th:object="${user}" class="auth-form">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="form-label">Username:</label>
+                                    <input type="text" class="form-control" th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'" 
+                                           id="username" th:field="*{username}" required>
+                                    <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error-text"></div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="form-label">Email:</label>
+                                    <input type="email" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" 
+                                           id="email" th:field="*{email}" required>
+                                    <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-text"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="fullName" class="form-label">Full Name:</label>
+                                    <input type="text" class="form-control" th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'" 
+                                           id="fullName" th:field="*{fullName}" required>
+                                    <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error-text"></div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Password:</label>
+                                    <input type="password" class="form-control" th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" 
+                                           id="password" th:field="*{password}" required>
+                                    <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error-text"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="phone" class="form-label">Phone:</label>
+                                    <input type="tel" class="form-control" id="phone" th:field="*{phone}">
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="role" class="form-label">Register as:</label>
+                                    <select class="form-select" id="role" name="role" required>
+                                        <option value="">Select Role</option>
+                                        <option value="USER">Customer</option>
+                                        <option value="VENDOR">Vendor</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address:</label>
+                                <textarea class="form-control" id="address" th:field="*{address}" rows="3"></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-success btn-full mt-3">
+                                <i class="fas fa-user-plus me-2"></i>Register
+                            </button>
+                        </form>
+                        
+                        <p class="auth-link">
+                            Already have an account? <a href="/login" class="text-success">Login here</a>
+                        </p>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" th:field="*{email}" required>
-                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-text"></span>
-                </div>
-                
-                <div class="form-group">
-                    <label for="fullName">Full Name:</label>
-                    <input type="text" id="fullName" th:field="*{fullName}" required>
-                    <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error-text"></span>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" th:field="*{password}" required>
-                    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error-text"></span>
-                </div>
-                
-                <div class="form-group">
-                    <label for="phone">Phone:</label>
-                    <input type="tel" id="phone" th:field="*{phone}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="address">Address:</label>
-                    <textarea id="address" th:field="*{address}" rows="3"></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="role">Register as:</label>
-                    <select id="role" name="role" required>
-                        <option value="">Select Role</option>
-                        <option value="USER">Customer</option>
-                        <option value="VENDOR">Vendor</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-primary btn-full">Register</button>
-            </form>
-            
-            <p class="auth-link">
-                Already have an account? <a href="/login">Login here</a>
-            </p>
+            </div>
         </div>
     </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

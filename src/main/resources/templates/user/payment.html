@@ -4,261 +4,187 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Complete Payment | FreshMart</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .payment-container {
             max-width: 800px;
-            margin: 2rem auto;
-            padding: 2rem;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .payment-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .order-info {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-        
-        .payment-methods {
-            margin-top: 2rem;
-        }
-        
-        .payment-tabs {
-            display: flex;
-            border-bottom: 1px solid #dee2e6;
-            margin-bottom: 1.5rem;
-        }
-        
-        .payment-tab {
-            padding: 0.75rem 1.5rem;
-            cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            margin-right: 0.5rem;
-            font-weight: 500;
+        .payment-tabs .nav-link {
             color: #6c757d;
-        }
-        
-        .payment-tab.active {
-            color: #28a745;
-            border-color: #dee2e6;
-            border-bottom-color: white;
-            background: white;
-        }
-        
-        .payment-method {
-            display: none;
-            padding: 1.5rem;
-            border: 1px solid #dee2e6;
-            border-radius: 0 0 4px 4px;
-            border-top: none;
-        }
-        
-        .payment-method.active {
-            display: block;
-        }
-        
-        .form-group {
-            margin-bottom: 1.25rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
             font-weight: 500;
+            border: none;
+            border-bottom: 3px solid transparent;
         }
-        
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 1rem;
+        .payment-tabs .nav-link.active {
+            color: #28a745;
+            border-bottom-color: #28a745;
+            background: transparent;
         }
-        
-        .card-icons {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
+        .payment-method {
+            border: 1px solid #dee2e6;
+            border-radius: 0 0 8px 8px;
+            border-top: none;
+            padding: 2rem;
         }
-        
         .card-icons img {
             height: 30px;
-            width: auto;
-            object-fit: contain;
+            margin-right: 10px;
         }
-        
-        .row {
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .row .form-group {
-            flex: 1;
-        }
-        
-        .btn-pay {
-            width: 100%;
-            padding: 0.75rem;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            margin-top: 1rem;
-        }
-        
-        .btn-pay:hover {
-            background: #218838;
-        }
-        
-        .upi-apps {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 1.5rem 0;
-        }
-        
         .upi-apps img {
-            height: 40px;
-            width: auto;
+            height: 50px;
+            margin: 0 10px;
             cursor: pointer;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 0.5rem;
-            transition: all 0.2s;
+            transition: transform 0.3s;
         }
-        
         .upi-apps img:hover {
-            border-color: #28a745;
-            transform: translateY(-2px);
+            transform: scale(1.1);
         }
-        
-        .success-message {
-            text-align: center;
-            padding: 2rem;
-        }
-        
-        .success-message h2 {
+        .success-icon {
+            font-size: 5rem;
             color: #28a745;
-            margin-bottom: 1rem;
-        }
-        
-        .success-message .btn {
-            margin-top: 1.5rem;
         }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <h1 class="nav-logo">FreshMart</h1>
-            <div class="nav-links">
-                <a href="/user/dashboard" class="nav-link">Home</a>
-                <a href="/user/orders" class="nav-link">My Orders</a>
-                <a href="/logout" class="nav-link">Logout</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-success" href="#">FreshMart</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user/dashboard">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/user/orders">
+                            <i class="fas fa-clipboard-list"></i> My Orders
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="payment-container">
-            <!-- Success Message (shown after payment) -->
-            <div th:if="${success}" class="success-message">
-                <h2>Order Placed Successfully!</h2>
-                <p>Your order #<span th:text="${order.orderNumber}"></span> has been confirmed.</p>
-                <p>Total Amount: ₹<span th:text="${order.totalAmount}"></span></p>
-                <a href="/user/orders" class="btn btn-primary">View My Orders</a>
+    <!-- Main Content -->
+    <div class="container py-4">
+        <div class="payment-container mx-auto">
+            <!-- Success Message -->
+            <div th:if="${success}" class="text-center py-5">
+                <div class="success-icon mb-4">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2 class="fw-bold text-success mb-3">Order Placed Successfully!</h2>
+                <p class="lead">Your order #<span th:text="${order.orderNumber}"></span> has been confirmed.</p>
+                <p class="h4 mb-4">Total Amount: ₹<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></span></p>
+                <a href="/user/orders" class="btn btn-success btn-lg">
+                    <i class="fas fa-clipboard-list me-2"></i>View My Orders
+                </a>
             </div>
 
-            <!-- Payment Form (shown before payment) -->
+            <!-- Payment Form -->
             <div th:unless="${success}">
-                <div class="payment-header">
-                    <h2>Complete Your Payment</h2>
-                </div>
-                
-                <div class="order-info">
-                    <p><strong>Order #:</strong> <span th:text="${order.orderNumber}"></span></p>
-                    <p><strong>Total Amount:</strong> ₹<span th:text="${order.totalAmount}"></span></p>
+                <div class="text-center mb-5">
+                    <h2 class="fw-bold">Complete Your Payment</h2>
+                    <p class="lead">Order #<span th:text="${order.orderNumber}"></span></p>
+                    <p class="h4 text-success">₹<span th:text="${#numbers.formatDecimal(order.totalAmount, 1, 2)}"></span></p>
                 </div>
 
-                <div class="payment-methods">
-                    <div class="payment-tabs">
-                        <div class="payment-tab active" data-target="card">Credit/Debit Card</div>
-                        <div class="payment-tab" data-target="upi">UPI Payment</div>
-                    </div>
+                <ul class="nav nav-tabs payment-tabs" id="paymentTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="card-tab" data-bs-toggle="tab" 
+                                data-bs-target="#card" type="button" role="tab">
+                            <i class="far fa-credit-card me-2"></i>Card
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="upi-tab" data-bs-toggle="tab" 
+                                data-bs-target="#upi" type="button" role="tab">
+                            <i class="fas fa-mobile-alt me-2"></i>UPI
+                        </button>
+                    </li>
+                </ul>
 
-                    <!-- Card Payment Form -->
-                    <div id="card" class="payment-method active">
+                <div class="tab-content">
+                    <!-- Card Payment -->
+                    <div class="tab-pane fade show active payment-method" id="card" role="tabpanel">
                         <form th:action="@{/user/payment/complete/{id}(id=${order.id})}" method="post">
                             <input type="hidden" name="paymentType" value="CARD">
                             
-                            <div class="card-icons">
+                            <div class="card-icons mb-4">
                                 <img th:src="@{/images/visa.png}" alt="Visa">
                                 <img th:src="@{/images/mastercard.png}" alt="Mastercard">
                                 <img th:src="@{/images/rupay.png}" alt="RuPay">
                             </div>
 
-                            <div class="form-group">
-                                <label for="card-number">Card Number</label>
-                                <input type="text" id="card-number" name="cardNumber" class="form-control" 
+                            <div class="mb-3">
+                                <label class="form-label">Card Number</label>
+                                <input type="text" name="cardNumber" class="form-control" 
                                        placeholder="1234 5678 9012 3456" maxlength="19" required>
                             </div>
 
-                            <div class="form-group">
-                                <label for="card-name">Name on Card</label>
-                                <input type="text" id="card-name" name="cardName" class="form-control" 
+                            <div class="mb-3">
+                                <label class="form-label">Name on Card</label>
+                                <input type="text" name="cardName" class="form-control" 
                                        placeholder="John Doe" required>
                             </div>
 
                             <div class="row">
-                                <div class="form-group">
-                                    <label for="expiry-date">Expiry Date</label>
-                                    <input type="text" id="expiry-date" name="expiryDate" class="form-control" 
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Expiry Date</label>
+                                    <input type="text" name="expiryDate" class="form-control" 
                                            placeholder="MM/YY" maxlength="5" required>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label for="cvv">CVV</label>
-                                    <input type="text" id="cvv" name="cvv" class="form-control" 
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">CVV</label>
+                                    <input type="text" name="cvv" class="form-control" 
                                            placeholder="123" maxlength="3" required>
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn-pay">Place Order</button>
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-lock me-2"></i>Pay Now
+                            </button>
                         </form>
                     </div>
 
-                    <!-- UPI Payment Form -->
-                    <div id="upi" class="payment-method">
+                    <!-- UPI Payment -->
+                    <div class="tab-pane fade payment-method" id="upi" role="tabpanel">
                         <form th:action="@{/user/payment/complete/{id}(id=${order.id})}" method="post">
                             <input type="hidden" name="paymentType" value="UPI">
                             
-                            <div class="form-group">
-                                <label for="upi-id">UPI ID</label>
-                                <input type="text" id="upi-id" name="upiId" class="form-control" 
+                            <div class="mb-3">
+                                <label class="form-label">UPI ID</label>
+                                <input type="text" name="upiId" class="form-control" 
                                        placeholder="yourname@upi" required>
                             </div>
 
-                            <div class="upi-apps">
-                                <img th:src="@{/images/gpay.png}" alt="Google Pay" data-upi="gpay">
-                                <img th:src="@{/images/phonepe.png}" alt="PhonePe" data-upi="phonepe">
-                                <img th:src="@{/images/paytm.png}" alt="Paytm" data-upi="paytm">
-                                <img th:src="@{/images/bhim.png}" alt="BHIM" data-upi="bhim">
+                            <div class="text-center my-4">
+                                <p class="mb-3">Or pay using</p>
+                                <div class="upi-apps">
+                                    <img th:src="@{/images/gpay.png}" alt="Google Pay" onclick="setUpiId('gpay')">
+                                    <img th:src="@{/images/phonepe.png}" alt="PhonePe" onclick="setUpiId('phonepe')">
+                                    <img th:src="@{/images/paytm.png}" alt="Paytm" onclick="setUpiId('paytm')">
+                                    <img th:src="@{/images/bhim.png}" alt="BHIM" onclick="setUpiId('bhim')">
+                                </div>
                             </div>
 
-                            <button type="submit" class="btn-pay">Place Order</button>
+                            <button type="submit" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-lock me-2"></i>Pay Now
+                            </button>
                         </form>
                     </div>
                 </div>
@@ -266,55 +192,37 @@
         </div>
     </div>
 
-    <script th:inline="javascript">
-        // Tab switching functionality
-        document.querySelectorAll('.payment-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                // Remove active class from all tabs and methods
-                document.querySelectorAll('.payment-tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.payment-method').forEach(m => m.classList.remove('active'));
-                
-                // Add active class to clicked tab and corresponding method
-                this.classList.add('active');
-                const target = this.getAttribute('data-target');
-                document.getElementById(target).classList.add('active');
-            });
-        });
-
+    <script>
         // Format card number with spaces every 4 digits
-        document.getElementById('card-number').addEventListener('input', function(e) {
+        document.querySelector('input[name="cardNumber"]').addEventListener('input', function(e) {
             this.value = this.value.replace(/\s/g, '').replace(/(\d{4})/g, '$1 ').trim();
         });
 
         // Format expiry date as MM/YY
-        document.getElementById('expiry-date').addEventListener('input', function(e) {
+        document.querySelector('input[name="expiryDate"]').addEventListener('input', function(e) {
             this.value = this.value
-                .replace(/\D/g, '') // Remove non-digits
-                .replace(/^(\d{2})/, '$1/') // Add slash after 2 digits
-                .substring(0, 5); // Limit to MM/YY format
+                .replace(/\D/g, '')
+                .replace(/^(\d{2})/, '$1/')
+                .substring(0, 5);
         });
 
         // UPI app selection helper
-        document.querySelectorAll('.upi-apps img').forEach(img => {
-            img.addEventListener('click', function(e) {
-                e.preventDefault();
-                const upiApp = this.getAttribute('data-upi');
-                const upiIdField = document.getElementById('upi-id');
-                
-                // Set UPI ID suffix based on selected app
-                const suffixes = {
-                    'gpay': '@okicici',
-                    'phonepe': '@ybl',
-                    'paytm': '@paytm',
-                    'bhim': '@upi'
-                };
-                
-                // Preserve the username part if already entered
-                const currentValue = upiIdField.value.split('@')[0] || 'yourname';
-                upiIdField.value = currentValue + suffixes[upiApp];
-                upiIdField.focus();
-            });
-        });
+        function setUpiId(app) {
+            const suffixes = {
+                'gpay': '@okicici',
+                'phonepe': '@ybl',
+                'paytm': '@paytm',
+                'bhim': '@upi'
+            };
+            
+            const upiIdField = document.querySelector('input[name="upiId"]');
+            const currentValue = upiIdField.value.split('@')[0] || 'yourname';
+            upiIdField.value = currentValue + suffixes[app];
+            upiIdField.focus();
+        }
     </script>
+    
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
