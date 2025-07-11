@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shop - FreshMart</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Additional styles for quantity display */
+        .quantity-unit {
+            font-size: 0.9em;
+            color: #666;
+            margin-left: 5px;
+        }
+        .product-image-container {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .product-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .stock-info {
+            color: #666;
+            font-size: 0.9em;
+            margin: 5px 0;
+        }
+        .add-to-cart-form {
+            margin-top: 15px;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -20,20 +49,20 @@
     <div class="container">
         <div class="shop-header">
             <h1>Shop Fresh Products</h1>
-			
-			<div class="search-container">
-			    <form th:action="@{/user/dashboard}" method="get" class="search-form">
-			        <input type="text" 
-			               name="search" 
-			               th:value="${searchQuery}" 
-			               placeholder="Search products..." 
-			               class="search-input">
-			        <button type="submit" class="search-btn">Search</button>
-			        <a th:if="${searchQuery != null && !searchQuery.isEmpty()}" 
-			           href="/user/dashboard" 
-			           class="clear-search">Clear</a>
-			    </form>
-			</div>
+            
+            <div class="search-container">
+                <form th:action="@{/user/dashboard}" method="get" class="search-form">
+                    <input type="text" 
+                           name="search" 
+                           th:value="${searchQuery}" 
+                           placeholder="Search products..." 
+                           class="search-input">
+                    <button type="submit" class="search-btn">Search</button>
+                    <a th:if="${searchQuery != null && !searchQuery.isEmpty()}" 
+                       href="/user/dashboard" 
+                       class="clear-search">Clear</a>
+                </form>
+            </div>
             
             <div class="category-filters">
                 <a href="/user/dashboard" 
@@ -47,41 +76,70 @@
             </div>
         </div>
         
+        <!-- Alert messages -->
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
         <div th:if="${error}" class="alert alert-error" th:text="${error}"></div>
 
+        <!-- Empty state -->
         <div th:if="${products.empty}" class="empty-state">
             <p>No products available at the moment.</p>
         </div>
 
+        <!-- Products grid -->
         <div th:if="${!products.empty}" class="products-grid">
             <div th:each="product : ${products}" class="product-card">
-                <div class="product-image">
-					
-					<img th:src="${product.imageUrl}" 
-					     th:alt="${product.name}" 
-					     onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
-
-
-
+                <!-- Product image with consistent sizing -->
+                <div class="product-image-container">
+                    <img class="product-image"
+                         th:if="${product.imageData != null}"
+                         th:src="@{'/product/image/' + ${product.id}}"
+                         th:alt="${product.name}"
+                         onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
                 </div>
+                
                 <div class="product-info">
                     <h3 th:text="${product.name}"></h3>
                     <p class="product-category" th:text="${product.category.name}"></p>
                     <p class="product-description" th:text="${product.description}"></p>
-                    <div class="product-price">₹<span th:text="${product.price}"></span></div>
-                    <div class="product-stock">
-                        <span th:text="${product.quantity} + ' in stock'"></span>
+                    
+                    <div class="product-price">
+                        ₹<span th:text="${#numbers.formatDecimal(product.price, 1, 2)}"></span>
                     </div>
                     
-                    <form th:action="@{/user/add-to-cart/{id}(id=${product.id})}" method="post" class="add-to-cart-form">
+                    <!-- Stock information with quantity type -->
+                    <div class="stock-info">
+                        <span th:text="${product.quantity} + ' ' + ${product.quantityType.displayName} + ' available'">
+                            0 piece available
+                        </span>
+                    </div>
+                    
+                    <!-- Add to cart form -->
+                    <form th:action="@{/user/add-to-cart/{id}(id=${product.id})}" 
+                          method="post" 
+                          class="add-to-cart-form">
+                          
                         <div class="quantity-selector">
                             <label for="quantity">Quantity:</label>
-                            <input type="number" name="quantity" value="1" min="1" 
-                                   th:max="${product.quantity}" required>
+							<input type="number" name="quantity" value="1" min="1" 
+							                                   th:max="${product.quantity}" required>
+                            <!--<input type="number" 
+                                   name="quantity" 
+                                   value="1" 
+                                   min="0.1"
+                                   th:min="${product.quantityType == T(com.ecommerce.model.QuantityType).KG || 
+                                           product.quantityType == T(com.ecommerce.model.QuantityType).LITER ? '0.1' : '1'}"
+                                   th:max="${product.quantity}" 
+                                   th:step="${product.quantityType == T(com.ecommerce.model.QuantityType).KG || 
+                                            product.quantityType == T(com.ecommerce.model.QuantityType).LITER ? '0.1' : '1'}"
+                                   required>-->
+                            <span class="quantity-unit" th:text="${product.quantityType.displayName}">
+                                piece
+                            </span>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-full"
-                                th:disabled="${product.quantity == 0}">
+                        
+                        <button type="submit" 
+                                class="btn btn-primary btn-full"
+                                th:disabled="${product.quantity <= 0}">
                             <span th:text="${product.quantity > 0} ? 'Add to Cart' : 'Out of Stock'"></span>
                         </button>
                     </form>

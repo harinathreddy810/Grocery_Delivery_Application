@@ -13,13 +13,21 @@ public class UserService {
     
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
     
     public User saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User user1 = userRepository.save(user);
+        try {
+        emailService.newRegister(user.getFullName(), user.getId(), user.getEmail());
+        }catch (Exception e) {
+			System.out.println(e.getMessage());
+		}
+        return user1 ;
     }
     
     public Optional<User> findByUsername(String username) {

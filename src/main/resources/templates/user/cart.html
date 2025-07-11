@@ -44,6 +44,11 @@
                     <div class="item-quantity">
                         <span>Quantity: </span>
                         <span th:text="${item.quantity}"></span>
+						
+						<!--<span th:text="${item.quantityType.displayName}"></span>-->
+						<!--<span class="quantity-unit" th:text="${product.quantityType.displayName}">piece</span>-->
+						                                
+						                            
                     </div>
                     <div class="item-total">
                         <strong>₹<span th:text="${item.subTotal}"></span></strong>

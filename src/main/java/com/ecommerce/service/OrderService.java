@@ -1,30 +1,49 @@
 package com.ecommerce.service;
 
-import com.ecommerce.model.*;
-import com.ecommerce.repository.OrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import java.security.Principal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.memory.UserAttribute;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.ecommerce.model.Cart;
+import com.ecommerce.model.CartItem;
+import com.ecommerce.model.Order;
+import com.ecommerce.model.OrderItem;
+import com.ecommerce.model.Product;
+import com.ecommerce.model.User;
+import com.ecommerce.repository.OrderRepository;
+
 @Service
 public class OrderService {
+
+    private final UserService userService;
+
+    private final EmailService emailService;
 
     private final OrderRepository orderRepository;
     private final CartService cartService;
     private final ProductService productService;
 
+
     @Autowired
     public OrderService(OrderRepository orderRepository,
-                        CartService cartService,
+    					UserService userService,
+                        CartService cartService,EmailService emailService,
                         ProductService productService) {
         this.orderRepository = orderRepository;
         this.cartService = cartService;
         this.productService = productService;
+        this.emailService = emailService;
+        this.userService = userService;
     }
 
     @Transactional
@@ -103,7 +122,11 @@ public class OrderService {
     }
 
     // ✅ Newly added method
-    public Order updateOrder(Order order) {
-        return orderRepository.save(order);
+    public Order updateOrder(Order order ) {
+    	Order order1 = orderRepository.save(order);
+    	User user = order1.getUser();
+    	emailService.sendSuccessEmail(order1.getOrderNumber(),order1.getTotalAmount(),user.getEmail(),order1.getShippingAddress());
+        System.out.println(user);
+    	return order1 ;
     }
 }
