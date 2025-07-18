@@ -94,11 +94,21 @@ public class UserController {
     public String viewCart(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.findByUsername(userDetails.getUsername()).orElse(null);
         Cart cart = cartService.getOrCreateCart(user);
-
+        
+        // Check inventory for all items
+        boolean outOfStock = false;
+        for (CartItem item : cart.getCartItems()) {
+            if (item.getProduct().getQuantity() < item.getQuantity()) {
+                outOfStock = true;
+                break;
+            }
+        }
+        
         model.addAttribute("cart", cart);
+        model.addAttribute("outOfStock", outOfStock);
         return "user/cart";
     }
-
+    
     @PostMapping("/cart/remove/{productId}")
     public String removeFromCart(@PathVariable Long productId,
                                  @AuthenticationPrincipal UserDetails userDetails,
@@ -126,25 +136,40 @@ public class UserController {
 
     @PostMapping("/checkout/process")
     public String processCheckout(@RequestParam String paymentMethod,
-                                  @RequestParam String address,
-                                  @AuthenticationPrincipal UserDetails userDetails,
-                                  RedirectAttributes redirectAttributes) {
-
-        User user = userService.findByUsername(userDetails.getUsername()).orElse(null);
-
+                                @RequestParam String address,
+                                @AuthenticationPrincipal UserDetails userDetails,
+                                RedirectAttributes redirectAttributes) {
         try {
-            Order order = orderService.createOrder(user, paymentMethod, address);
+            User user = userService.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+            
+            // Pre-check inventory before processing
+            Cart cart = cartService.getOrCreateCart(user);
+            for (CartItem item : cart.getCartItems()) {
+                Product product = item.getProduct();
+                if (product.getQuantity() < item.getQuantity()) {
+                    throw new IllegalStateException(
+                        product.getName() + " only has " + product.getQuantity() + 
+                        " items left (you requested " + item.getQuantity() + ")");
+                }
+            }
 
+            Order order = orderService.createOrder(user, paymentMethod, address);
+            
             if ("ONLINE".equalsIgnoreCase(paymentMethod)) {
                 return "redirect:/user/payment/" + order.getId();
             }
-
-            redirectAttributes.addFlashAttribute("success",
-                    "Order #" + order.getOrderNumber() + " placed successfully!");
+            
+            redirectAttributes.addFlashAttribute("success", 
+                "Order #" + order.getOrderNumber() + " placed successfully!");
             return "redirect:/user/orders";
-
+            
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/user/cart";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", 
+                "Order processing failed. Please try again or contact support.");
             return "redirect:/user/cart";
         }
     }

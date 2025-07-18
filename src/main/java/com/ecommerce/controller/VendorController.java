@@ -103,6 +103,7 @@ public class VendorController {
         productDto.setDescription(product.getDescription());
         productDto.setPrice(product.getPrice());
         productDto.setQuantity(product.getQuantity());
+        productDto.setQuantityType(product.getQuantityType());
         productDto.setCategoryId(product.getCategory().getId());
 
         model.addAttribute("product", productDto);
@@ -120,7 +121,6 @@ public class VendorController {
                             Model model,
                             RedirectAttributes redirectAttributes) {
 
-        // Validate input
         if (result.hasErrors()) {
             model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("productId", id);
@@ -138,18 +138,17 @@ public class VendorController {
             return "redirect:/vendor/dashboard";
         }
 
-        // Update product
+        // Update ALL fields including quantity
         existingProduct.setName(productDto.getName());
         existingProduct.setDescription(productDto.getDescription());
         existingProduct.setPrice(productDto.getPrice());
+        existingProduct.setQuantity(productDto.getQuantity()); // THIS WAS MISSING
         existingProduct.setQuantityType(productDto.getQuantityType());
         
-        // Update category
         Category category = categoryRepository.findById(productDto.getCategoryId())
             .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
         existingProduct.setCategory(category);
 
-        // Update image if provided
         try {
             if (productDto.getImageFile() != null && !productDto.getImageFile().isEmpty()) {
                 existingProduct.setImageName(productDto.getImageFile().getOriginalFilename());
@@ -165,7 +164,6 @@ public class VendorController {
         redirectAttributes.addFlashAttribute("success", "Product updated successfully!");
         return "redirect:/vendor/dashboard";
     }
-
     // --- Delete Product ---
 
     @PostMapping("/delete-product/{id}")

@@ -47,61 +47,49 @@ public class OrderService {
     }
 
     @Transactional
-    public Order createOrder(User user, String paymentMethod, String shippingAddress) {
+    public Order createOrder(User user, String paymentMethod, String address) {
         Cart cart = cartService.getOrCreateCart(user);
-
+        
         if (cart.getCartItems().isEmpty()) {
-            throw new IllegalStateException("Cannot create order from empty cart");
+            throw new IllegalStateException("Cart is empty");
         }
 
-        // Generate unique order number
+        // Create order first
         String orderNumber = "ORD-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        Order order = new Order(user, orderNumber, cart.getTotalAmount(), paymentMethod, address);
 
-        // Create order
-        Order order = new Order(
-                user,
-                orderNumber,
-                cart.getTotalAmount(),
-                paymentMethod,
-                shippingAddress
-        );
-
-        // Convert cart items to order items
+        // Process items and update inventory
         Set<OrderItem> orderItems = new HashSet<>();
         for (CartItem cartItem : cart.getCartItems()) {
             Product product = cartItem.getProduct();
-
-            // Check stock availability
+            
+            // Verify stock with clear error message
             if (product.getQuantity() < cartItem.getQuantity()) {
                 throw new IllegalStateException(
-                        "Insufficient stock for product: " + product.getName());
+                    "Only " + product.getQuantity() + " items available for " + product.getName() + 
+                    ", but " + cartItem.getQuantity() + " requested");
             }
 
-            // Reduce product quantity
-            product.setQuantity(product.getQuantity() - cartItem.getQuantity());
+            // Update product quantity (can go to zero)
+            int newQuantity = product.getQuantity() - cartItem.getQuantity();
+            product.setQuantity(newQuantity);
             productService.updateProduct(product);
 
             // Create order item
             OrderItem orderItem = new OrderItem(
-                    order,
-                    product,
-                    cartItem.getQuantity(),
-                    cartItem.getPrice()
+                order, product, cartItem.getQuantity(), cartItem.getPrice()
             );
             orderItems.add(orderItem);
         }
 
         order.setOrderItems(orderItems);
-
-        // Save order
         Order savedOrder = orderRepository.save(order);
-
-        // Clear cart
+        
+        // Clear cart only after successful order creation
         cartService.clearCart(user);
-
+        
         return savedOrder;
     }
-
     public List<Order> getUserOrders(User user) {
         return orderRepository.findByUser(user);
     }
